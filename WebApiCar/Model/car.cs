@@ -22,6 +22,11 @@ namespace WebApiCar.Model
 
         }
 
+        public Car(int id)
+        {
+            Id = id;
+        }
+
         public Car(int id, string vendor, string model, int price)
         {
             Id = id;
