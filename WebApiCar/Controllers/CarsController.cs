@@ -101,7 +101,7 @@ namespace WebApiCar.Controllers
         public IEnumerable<Car> GetByVendor(string vendor)
         {
             var carList = new List<Car>();
-            //Car c = new Car();
+            
             string selectByVendor = "select id, model, price, vendor from Car where vendor = @vendor";
 
             using (SqlConnection databaseConnection = new SqlConnection(conn))
@@ -175,8 +175,21 @@ namespace WebApiCar.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
-            //carList.Remove(Get(id));
+            string query = "delete from car where id=@id";
+            using (SqlConnection dataBaseConnection = new SqlConnection (conn))
+            {
+                dataBaseConnection.Open();
+                using (SqlCommand insertCommand = new SqlCommand(query, dataBaseConnection))
+                {
+                    insertCommand.Parameters.AddWithValue("@id", id);
+
+                    var rowsAffected = insertCommand.ExecuteNonQuery();
+
+                }
+            }
+          
         }
+    }
 
        //int GetId()
        // {
@@ -185,4 +198,4 @@ namespace WebApiCar.Controllers
        // }
 
     }
-}
+
