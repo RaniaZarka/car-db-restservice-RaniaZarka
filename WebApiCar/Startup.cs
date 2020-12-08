@@ -28,7 +28,30 @@ namespace WebApiCar
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddCors(options =>
+            {
+                // 1 st policy --> allow specific origin
+                options.AddPolicy("AllowSpecificOrigins",
+                builder =>
+                {
+                    builder.WithOrigins("https://azure.microsoft.com/").AllowAnyHeader().AllowAnyMethod();
+                });
+
+                // 2nd Policy --> allow any origins -- Now you have to public your services
+                options.AddPolicy("AllowAnyOrigins",
+                builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+
+                // 3rd Policy --> allow only Get Put Method 
+                options.AddPolicy("AllowAnyOriginsGetPUT",
+                builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().WithMethods("GET", "POST");
+                });
+            });
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -51,6 +74,7 @@ namespace WebApiCar
                 var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,7 +88,17 @@ namespace WebApiCar
             {
                 app.UseHsts();
             }
-
+            // You must have to follow the exact sequence to implement the CORS....
+            app.UseHttpsRedirection();
+            // 1st use Use.Routing()
+            app.UseRouting();
+            // 2nd use os UseCors
+            // Shows which cors policy you would to like to define here. use.cors
+            app.UseCors("AllowAnyOrigins");
+            //app.UseCors("AllowSpecificOrigins");
+            //app.UseCors("AllowAnyOrigins");
+            // 3rd use UseAuthorization
+            app.UseAuthorization();
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
